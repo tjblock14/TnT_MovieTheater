@@ -21,6 +21,14 @@
     "*.php": "php",
     "stdio.h": "c",
     "esp_netif.h": "c",
-    "corevariables.h": "c"
+    "corevariables.h": "c",
+    "gpio.h": "c",
+    "task.h": "c",
+    "led_strip.h": "c",
+    "rmt_tx.h": "c",
+    "freertos.h": "c",
+    "queue.h": "c",
+    "tvbacklightmanager.h": "c",
+    "led_strip_spi.h": "c"
   }
 }
