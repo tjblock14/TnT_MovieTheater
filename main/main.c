@@ -19,13 +19,13 @@ void app_main(void)
 {
     // Will want to initialize some stuff up here i'm sure before starting tasks
 
-    //xTaskCreate(Wifi_Core, "Wifi Core Task", 1024 * 4, NULL, 0, NULL); 
+    xTaskCreate(Wifi_Core, "Wifi Core Task", 1024 * 4, NULL, 0, NULL); 
 
-    TvBacklight_Init();
-    vTaskDelay(pdMS_TO_TICKS(1000));
-    Clear_TvBacklight_Strip();
-    vTaskDelay(pdMS_TO_TICKS(1000));
-    /* Temporary while 1 loop for testing */
+    // TvBacklight_Init();
+   // vTaskDelay(pdMS_TO_TICKS(1000));
+   // Clear_TvBacklight_Strip();
+   // vTaskDelay(pdMS_TO_TICKS(1000));
+    /* Temporary while 1 loop for testing *
     while(1)
     {
         
@@ -37,4 +37,5 @@ void app_main(void)
 
         vTaskDelay(pdMS_TO_TICKS(50));
     } 
+    */
 }

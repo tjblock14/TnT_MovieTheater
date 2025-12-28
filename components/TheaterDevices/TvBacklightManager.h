@@ -6,9 +6,6 @@
 #include "freertos/queue.h"
 #include "freertos/task.h"
 
-/* The number of LEDs on the TV backlight strip */
-#define NUM_BACKLIGHT_LEDS 300
-
 /* FIXME: The GPIO Pin that the LED strip's data line is connected to */
 #define TV_BACKLIGHT_PIN 7
 
