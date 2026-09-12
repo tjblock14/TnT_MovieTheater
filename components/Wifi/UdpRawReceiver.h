@@ -1,0 +1,7 @@
+#ifndef UDP_RAW_RECEIVER_H
+#define UDP_RAW_RECEIVER_H
+
+#define TV_BACKLIGHT_UDP_PORT     (5568)
+
+
+#endif // UDP_RAW_RECEIVER_H

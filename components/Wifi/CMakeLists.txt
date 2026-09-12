@@ -1,4 +1,4 @@
-idf_component_register(SRCS "wifi.c"
+idf_component_register(SRCS "UdpRawReceiver.c" "wifi.c"
                     INCLUDE_DIRS "."
                     PRIV_REQUIRES 
                         Core
