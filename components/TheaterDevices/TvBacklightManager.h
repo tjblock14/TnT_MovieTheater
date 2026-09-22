@@ -51,6 +51,18 @@ typedef struct
 
 } tv_backlight_cmd_with_info_t;
 
+/* This will be the main baclkight struct for one LED strip with all relevant info. Things need to be moved in here */
+typedef struct
+{
+    /* Is the strip on or off? */
+    bool bPoweredOn;
+    
+    uint8_t u8BrightnessPct;
+
+} BacklightStrip_t;
+
+extern BacklightStrip_t MainTvBacklightStrip;
+
 /* Function Declarations */
 esp_err_t TvBacklight_Init(void);
 esp_err_t TvBacklight_SetLED_Color(uint16_t index, backlight_led_values_t color);

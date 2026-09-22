@@ -18,6 +18,8 @@ static led_strip_handle_t TvBacklightStrip = NULL;
 static QueueHandle_t q_TvBacklight_Queue = NULL;
 static TaskHandle_t  t_TvBacklight_TaskHandle = NULL;
 
+BacklightStrip_t MainTvBacklightStrip;
+
 /* Configuration for the LED Strip*/
 led_strip_config_t TvBacklight_Strip_Cfg = 
 {
@@ -87,6 +89,11 @@ esp_err_t TvBacklight_Init(void)
 
     /* Create the LED strip object */
     err = led_strip_new_spi_device(&TvBacklight_Strip_Cfg, &spi_TvBacklight_Cfg, &TvBacklightStrip);
+
+
+    /* Default the global struct values*/
+    MainTvBacklightStrip.bPoweredOn      = false;
+    MainTvBacklightStrip.u8BrightnessPct = 100;
 
     #ifdef DEBUG_CFG
         ESP_LOGI(TAG, "TV backlight strip is created on GPIO %d with %d LEDs", TV_BACKLIGHT_PIN, NUM_BACKLIGHT_LEDS);
