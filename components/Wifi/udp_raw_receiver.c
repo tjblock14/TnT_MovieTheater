@@ -1,6 +1,8 @@
 #include "udp_raw_receiver.h"
 #include "CoreDefines.h"
 #include "CoreVariables.h"
+#include "TvBacklightManager.h"
+#include "network_events.h"
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
@@ -21,32 +23,43 @@
 #endif
 
 #define UDP_LISTEN_PORT          (7777)
-#define UDP_BUF_SIZE             (256)
 
-static void udp_listen_task(void *pvParameters)
+/* The size of the UDP receive buffer. 900 for 300 (led number) * 3 for   *
+ * a red, blue, and green byte. We hadd an extra 50 bytes just to be safe */
+#define UDP_BUF_SIZE             (900)
+
+void udp_listen_task(void *pvParameters)
 {
-    uint8_t udp_buff[UDP_BUF_SIZE];
+    static uint8_t udp_buff[UDP_BUF_SIZE];
+
+    /* Wait to do anything with UDP until Wi-Fi is connected */
+    xEventGroupWaitBits(g_NetworkEventGroup, NET_EVT_GOT_IP, pdFALSE, pdTRUE, portMAX_DELAY);
 
     /* First, create the socket */
     int UdpSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
-
-    /* Set a timeout for how long we wait to receive a packet */
-    struct timeval timeout = { .tv_sec = 2, .tv_usec = 0 };
-    setsockopt(UdpSocket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
-
 
     /* If the socket was not successfully created, delete the task */
     if(UdpSocket < 0)
     {
         #ifdef DEBUG_CFG
-            ESP_LOGE(TAG, "Unable to create the socket");
+            ESP_LOGE(TAG, "Unable to create the socket: %d", errno);
         #endif
 
         vTaskDelete(NULL);
         return;
     }
 
-    /* Now, bind it? */
+    /* Set a timeout for how long we wait to receive a packet */
+    struct timeval timeout = { .tv_sec = 2, .tv_usec = 0 };
+    if(setsockopt(UdpSocket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0) // < 0 indicates an error
+    {
+        #ifdef DEBUG_CFG
+            ESP_LOGW(TAG, "setsockopt(SO_RCVTIMEO) failed, errno: %d", errno);
+        #endif
+    }
+
+    /* Now, we bind the socket to the UDP port so the  *
+     * socket acts as a listener on the specified port */
 
     /* Create an empty sock address struct */
     struct sockaddr_in st_UdpListen = {0};
@@ -60,7 +73,7 @@ static void udp_listen_task(void *pvParameters)
     if(err < 0)
     {
         #ifdef DEBUG_CFG
-            ESP_LOGE(TAG, "Socket did not bind correctly - Err: %d", err);
+            ESP_LOGE(TAG, "Socket did not bind correctly - errno: %d", errno);
         #endif
 
         close(UdpSocket);
@@ -92,7 +105,7 @@ static void udp_listen_task(void *pvParameters)
             }
 
             #ifdef DEBUG_CFG 
-                ESP_LOGE(TAG, "recfrom() failed, error: %d", errno);
+                ESP_LOGE(TAG, "recvfrom() failed, error: %d", errno);
             #endif
 
             continue;
@@ -102,7 +115,7 @@ static void udp_listen_task(void *pvParameters)
              /* Convert the Sender's IP from binary to string format and log it */
             char SenderIp[32];
             inet_ntoa_r(SourceAddr.sin_addr, SenderIp, sizeof(SenderIp));
-            ESP_LOGI(TAG, "RX %d bytes from %s:%d", UdpBytesReceived, SenderIp, ntohs(SourceAddr.sin_port));
+            //ESP_LOGI(TAG, "RX %d bytes from %s:%d", UdpBytesReceived, SenderIp, ntohs(SourceAddr.sin_port));
         #endif
 
         /*
@@ -111,6 +124,7 @@ static void udp_listen_task(void *pvParameters)
          * This sets ALL LEDs to one color. Once this works, you can upgrade
          * to full frames (LED_COUNT * 4 bytes).
          */
+        #ifdef TEST_TV_BACKLIGHT_UDP_RECEIVE
         if (UdpBytesReceived == 4) 
         {
             uint8_t red = udp_buff[0];
@@ -118,9 +132,33 @@ static void udp_listen_task(void *pvParameters)
             uint8_t blue = udp_buff[2];
             uint8_t white = udp_buff[3];
 
-            /* FIXME: Set the actual function to set all LEDs*/
-            tv_backlight_set_all(red, green, blue, white);
+            backlight_led_values_t color = {red, green, blue, white};
+
+            /* FIXME: Here, just for testing, set the whole strip */
+            Set_TvBacklight_Strip_To_Constant_Color(color);
+        }
+        #else
+        if (UdpBytesReceived == TV_BACKLIGHT_UDP_RX_SIZE) 
+        {
+            for(uint16_t index = 0; index < NUM_BACKLIGHT_LEDS; index++)
+            {
+                uint8_t red = udp_buff[(index * 3)];
+                uint8_t green = udp_buff[(index * 3) + 1];
+                uint8_t blue = udp_buff[(index * 3) + 2];
+
+                /* For now, always set white to zero, can fix this later if needed */
+                backlight_led_values_t color = {red, green, blue, 0};
+
+                /* Now, set the color of this LED */
+                TvBacklight_SetLED_Color(index, color);
+
+                //ESP_LOGI("TAG", "Set led %d to R: %d, G:%d, B:%d, W: %d", index, color.red, color.green, color.blue);
+            }
+
+            /* Now, refresh the strip (actually sends the command )*/
+            Refresh_TvBacklight_Strip();
         } 
+        #endif
         else 
         {
             #ifdef DEBUG_CFG

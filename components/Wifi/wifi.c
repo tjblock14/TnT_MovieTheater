@@ -1,5 +1,7 @@
 #include "wifi.h"
 #include "CoreVariables.h"
+#include "network_events.h"
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_wifi.h"
@@ -72,26 +74,33 @@ void vWifi_Init()
     ESP_LOGI(TAG, "wifi_init_sta finished.");
 }
 
-static void wifi_event_handler(void *arg, esp_event_base_t event_source, int32_t event_type, void *event_data)
+static void wifi_event_handler(void *arg, esp_event_base_t event_source, int32_t event_id, void *event_data)
 {
-    if((event_source == WIFI_EVENT) && (event_type == WIFI_EVENT_STA_START))
+    if((event_source == WIFI_EVENT) && (event_id == WIFI_EVENT_STA_START))
     {
         ESP_LOGI(TAG, "Station start -> connecting...");
+        
+        xEventGroupSetBits(g_NetworkEventGroup, NET_EVT_WIFI_STARTED);
         esp_wifi_connect();
     }
-    else if((event_source == WIFI_EVENT) && (event_type == WIFI_EVENT_STA_CONNECTED))
+    else if((event_source == WIFI_EVENT) && (event_id == WIFI_EVENT_STA_CONNECTED))
     {
         ESP_LOGI(TAG, "Connected to AP");
+        xEventGroupSetBits(g_NetworkEventGroup, NET_EVT_WIFI_CONNECTED);
     }
-    else if((event_source == WIFI_EVENT) && (event_type == WIFI_EVENT_STA_DISCONNECTED))
+    else if((event_source == WIFI_EVENT) && (event_id == WIFI_EVENT_STA_DISCONNECTED))
     {
         wifi_event_sta_disconnected_t *sta_disconnect =  (wifi_event_sta_disconnected_t *)event_data;
         ESP_LOGW(TAG, "Disconnected, reason = %d. Reconnecting...", sta_disconnect->reason);
+
+        xEventGroupClearBits(g_NetworkEventGroup, (NET_EVT_WIFI_CONNECTED | NET_EVT_GOT_IP));
         esp_wifi_connect();
     }
-    else if((event_source == IP_EVENT) && (event_type == IP_EVENT_STA_GOT_IP))
+    else if((event_source == IP_EVENT) && (event_id == IP_EVENT_STA_GOT_IP))
     {
         ip_event_got_ip_t *ip_data = (ip_event_got_ip_t *)event_data;
         ESP_LOGI(TAG, "Got IP: " IPSTR, IP2STR(&ip_data->ip_info.ip));
+        
+        xEventGroupSetBits(g_NetworkEventGroup, NET_EVT_GOT_IP);
     }
 }

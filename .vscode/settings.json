@@ -30,5 +30,6 @@
     "queue.h": "c",
     "tvbacklightmanager.h": "c",
     "led_strip_spi.h": "c"
-  }
+  },
+  "idf.currentSetup": "C:\\Users\\trevo\\esp\\v5.5.1\\esp-idf"
 }

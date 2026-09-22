@@ -5,7 +5,7 @@
 #define WIFI_SSID      "TnT Dungeon"
 #define WIFI_PASSWORD  "TayloafTbot1431"
 
-/* Function Declarations*/
+/* Function Declarations */
 extern void Wifi_Core(void *pvParameters);
 
 #endif // WIFI_H

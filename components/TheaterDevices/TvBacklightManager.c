@@ -121,17 +121,7 @@ esp_err_t TvBacklight_SetLED_Color(uint16_t index, backlight_led_values_t color)
         color.white
     );
 
-    if(err == ESP_OK)
-    {
-        /* Refresh the strip so it actually updates */
-        Refresh_TvBacklight_Strip();
-    }
-
-    if(err == ESP_OK)
-    {
-        ESP_LOGI(TAG, "Set color to R:%d, G:%d, B:%d, W:%d", color.red, color.green, color.blue, color.white);
-    }
-    else
+    if(err != ESP_OK)
     {
         ESP_LOGE(TAG, "Error: %d", err);
     }
