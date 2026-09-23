@@ -7,7 +7,7 @@
 #define WIFI_SSID      "TnT Dungeon"
 #define WIFI_PASSWORD  "TayloafTbot1431"
 
-/* Function Declarations*/
+/* Function Declarations */
 extern void Wifi_Core(void *pvParameters);
 
 /* Enumeration that holds the state of the Wi-Fi of the esp32 */
