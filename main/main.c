@@ -4,11 +4,13 @@
 #include "esp_log.h"
 #include "esp_err.h"
 
+#include "BluetoothCore.h"
 #include "wifi.h"
 #include "udp_raw_receiver.h"
 #include "network_events.h"
 
 #include "TvBacklightManager.h"
+#include "BluetoothCore.h"
 
 backlight_led_values_t color =
         {
@@ -26,6 +28,9 @@ void app_main(void)
     xTaskCreate(Wifi_Core, "Wifi Core Task", 1024 * 4, NULL, 0, NULL);
     xTaskCreate(udp_listen_task, "UDP Listen Task", 1024 * 6, NULL, 0, NULL);
 
+    xTaskCreate(Bluetooth_Core, "Bluetooth Core Task",1024 * 7, NULL, 1, NULL);
+
+    
     TvBacklight_Init();
     vTaskDelay(pdMS_TO_TICKS(1000));
     Clear_TvBacklight_Strip();

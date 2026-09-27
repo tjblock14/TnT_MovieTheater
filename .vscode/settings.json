@@ -5,7 +5,6 @@
   "idf.openOcdConfigs": [
     "board/esp32c61-builtin.cfg"
   ],
-  "idf.portWin": "COM5",
   "idf.toolsPathWin": "C:\\Espressif",
   "idf.customExtraVars": {
     "IDF_TARGET": "esp32c61"
@@ -30,5 +29,7 @@
     "queue.h": "c",
     "tvbacklightmanager.h": "c",
     "led_strip_spi.h": "c"
-  }
+  },
+  "idf.currentSetup": "C:\\Users\\trevo\\esp\\v5.5.1\\esp-idf",
+  "idf.port": "COM7"
 }

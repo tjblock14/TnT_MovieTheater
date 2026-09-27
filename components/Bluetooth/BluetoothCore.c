@@ -592,7 +592,7 @@ void InitializeAttributeTable(void)
     BluetoothStatus.AttributeTable[BACKLIGHT_POWER_VAL].att_desc.perm         = (ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE); // Validate the request before accepting
     BluetoothStatus.AttributeTable[BACKLIGHT_POWER_VAL].att_desc.max_length   = sizeof(MainTvBacklightStrip.bPoweredOn);
     BluetoothStatus.AttributeTable[BACKLIGHT_POWER_VAL].att_desc.length       = sizeof(MainTvBacklightStrip.bPoweredOn);
-    BluetoothStatus.AttributeTable[BACKLIGHT_POWER_VAL].att_desc.value        = &MainTvBacklightStrip.bPoweredOn;
+    BluetoothStatus.AttributeTable[BACKLIGHT_POWER_VAL].att_desc.value        = (uint8_t *)&MainTvBacklightStrip.bPoweredOn;
 
     /* Brightness Characteristic */
     BluetoothStatus.AttributeTable[BACKLIGHT_BRIGHTNESS_CHAR].attr_control.auto_rsp = ESP_GATT_AUTO_RSP;
