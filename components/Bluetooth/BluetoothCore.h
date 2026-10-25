@@ -7,9 +7,14 @@ void Bluetooth_Core(void *pvParameters);
  * Configuration
  *****************************************************/
 
+ /*****************************************************
+ * Functions
+ *****************************************************/
+void vSleepWithBluetooth(void);
+
 
 /*****************************************************
- * Defninitions
+ * Definitions
  *****************************************************/
 
  /* Application Profile. This is a way to organize the bluetooth server code */

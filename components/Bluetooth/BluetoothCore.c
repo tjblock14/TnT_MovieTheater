@@ -17,6 +17,7 @@
 #include "BluetoothCore.h"
 #include "BluetoothStructs.h"
 #include "TvBacklightManager.h"
+#include "CoreDefines.h"
 
 /* Tag used for esp logs */
 static const char *TAG = "Bluetooth Core";
@@ -177,6 +178,10 @@ static void GattProfileEventHandler(esp_gatts_cb_event_t event, esp_gatt_if_t ga
             BluetoothStatus.WriteFlags.Bit.Power      = (param->write.handle == BluetoothStatus.Characteristics.BacklightHandles[BACKLIGHT_POWER_VAL]);
             BluetoothStatus.WriteFlags.Bit.Brightness = (param->write.handle == BluetoothStatus.Characteristics.BacklightHandles[BACKLIGHT_BRIGHTNESS_VAL]);
 
+            #ifdef DEBUG_CFG
+            ESP_LOGI(TAG, "Write Status:\n\rPower - %d\n\rBrightness - %d", BluetoothStatus.WriteFlags.Bit.Power, BluetoothStatus.WriteFlags.Bit.Brightness);
+            #endif
+
             if(!BluetoothStatus.WriteFlags.All)
             {
                 /* No valid setting is being written, go no further */
@@ -204,7 +209,18 @@ static void GattProfileEventHandler(esp_gatts_cb_event_t event, esp_gatt_if_t ga
                 }
                 else
                 {
-                    MainTvBacklightStrip.bPoweredOn = (param->write.value[0] != 0);
+                    tv_backlight_cmd_with_info_t BacklightCommand = {0};
+
+                    if(param->write.value[0] == 0)
+                    {
+                        BacklightCommand.action = TV_BACKLIGHT_CMD_POWER_DOWN;
+                    }
+                    else
+                    {
+                        BacklightCommand.action = TV_BACKLIGHT_CMD_POWER_ON;
+                    }
+
+                    xQueueSend(TvBacklight_Queue, &BacklightCommand, pdMS_TO_TICKS(10));
                 }
             }
             else // Writing brightness
@@ -215,7 +231,14 @@ static void GattProfileEventHandler(esp_gatts_cb_event_t event, esp_gatt_if_t ga
                 }
                 else
                 {
-                    MainTvBacklightStrip.u8BrightnessPct = param->write.value[0];
+                    /* Send the command to set the brightness to the backlight controller task*/
+                    tv_backlight_cmd_with_info_t BacklightCommand =
+                    {
+                        .action = TV_BACKLIGHT_CMD_SET_BRIGHTNESS,
+                        .Data.BrightnessPct = param->write.value[0],
+                    };
+
+                    xQueueSend(TvBacklight_Queue, &BacklightCommand, pdMS_TO_TICKS(10));
                 }
             }
 
