@@ -3,4 +3,5 @@ idf_component_register(SRCS "BluetoothCore.c"
                     PRIV_REQUIRES
                         bt
                         nvs_flash
-                        TheaterDevices)
+                        TheaterDevices
+                        Core)

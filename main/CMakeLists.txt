@@ -6,4 +6,5 @@ idf_component_register(SRCS "TheaterManager.c" "main.c"
                         Core
                         Bluetooth
                         nvs_flash
-                        led_strip)
+                        led_strip
+                        esp_driver_gpio)
