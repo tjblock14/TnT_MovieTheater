@@ -120,22 +120,25 @@ void udp_listen_task(void *pvParameters)
         /* One complete RGB frame; white remains off. */
         if (UdpBytesReceived == TV_BACKLIGHT_UDP_RX_SIZE)
         {
+            tv_backlight_cmd_with_info_t SetSingleLed;
+
             for(uint16_t index = 0; index < NUM_BACKLIGHT_LEDS; index++)
             {
-                uint8_t red = udp_buff[(index * 3)];
-                uint8_t green = udp_buff[(index * 3) + 1];
-                uint8_t blue = udp_buff[(index * 3) + 2];
+                SetSingleLed.action                   = TV_BACKLIGHT_CMD_SINGLE_LED;
+                SetSingleLed.Data.one_led.index       = index;
+                SetSingleLed.Data.one_led.color.red   = udp_buff[(index * 3)];
+                SetSingleLed.Data.one_led.color.green = udp_buff[(index * 3) + 1];
+                SetSingleLed.Data.one_led.color.blue  = udp_buff[(index * 3) + 2];
+                SetSingleLed.Data.one_led.color.white = 0;
 
-                /* For now, always set white to zero, can fix this later if needed */
-                backlight_led_values_t color = {red, green, blue, 0};
+                xQueueSend(TvBacklight_Queue, &SetSingleLed, 0);
 
-                /* Now, set the color of this LED */
-                TvBacklight_SetLED_Color(index, color);
-
-                //ESP_LOGI("TAG", "Set led %d to R: %d, G:%d, B:%d, W: %d", index, color.red, color.green, color.blue);
+                #ifdef DEBUG_CFG
+                ESP_LOGI("TAG", "Set led %d to R: %d, G:%d, B:%d, W: %d", index, SetSingleLed.Data.one_led.color.red, SetSingleLed.Data.one_led.color.green, SetSingleLed.Data.one_led.color.blue, SetSingleLed.Data.one_led.color.white);
+                #endif
             }
 
-            /* Now, refresh the strip (actually sends the command )*/
+            /* Now, refresh the strip (actually sends the strip LEDs) */
             Refresh_TvBacklight_Strip();
         }
         else
