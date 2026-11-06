@@ -131,15 +131,18 @@ void udp_listen_task(void *pvParameters)
                 SetSingleLed.Data.one_led.color.blue  = udp_buff[(index * 3) + 2];
                 SetSingleLed.Data.one_led.color.white = 0;
 
-                xQueueSend(TvBacklight_Queue, &SetSingleLed, 0);
+                xQueueSend(TvBacklight_Queue, &SetSingleLed, portMAX_DELAY);
 
                 #ifdef DEBUG_CFG
-                ESP_LOGI("TAG", "Set led %d to R: %d, G:%d, B:%d, W: %d", index, SetSingleLed.Data.one_led.color.red, SetSingleLed.Data.one_led.color.green, SetSingleLed.Data.one_led.color.blue, SetSingleLed.Data.one_led.color.white);
+                    //ESP_LOGI("TAG", "Set led %d to R: %d, G:%d, B:%d, W: %d", index, SetSingleLed.Data.one_led.color.red, SetSingleLed.Data.one_led.color.green, SetSingleLed.Data.one_led.color.blue, SetSingleLed.Data.one_led.color.white);
                 #endif
             }
 
-            /* Now, refresh the strip (actually sends the strip LEDs) */
-            Refresh_TvBacklight_Strip();
+            /* Refresh after the backlight task has applied every pixel. */
+            tv_backlight_cmd_with_info_t refresh = {
+                .action = TV_BACKLIGHT_CMD_REFRESH
+            };
+            xQueueSend(TvBacklight_Queue, &refresh, portMAX_DELAY);
         }
         else
         {

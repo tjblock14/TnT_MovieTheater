@@ -74,6 +74,15 @@ void TvBacklight_Task(void *pv)
 
                 case TV_BACKLIGHT_CMD_SINGLE_LED:
                     TvBacklight_SetLED_Color(backlight_cmd.Data.one_led.index, backlight_cmd.Data.one_led.color);
+                    
+                    #ifdef DEBUG_CFG
+                       // ESP_LOGE(TAG, "Command received");
+                    #endif
+                    break;
+
+                case TV_BACKLIGHT_CMD_REFRESH:
+                    esp_err_t err = Refresh_TvBacklight_Strip();
+                    ESP_LOGI(TAG, "Strip refresh: %s", esp_err_to_name(err));
                     break;
 
                 default:
@@ -150,6 +159,8 @@ esp_err_t TvBacklight_SetLED_Color(uint16_t index, backlight_led_values_t color)
         color.blue,
         color.white
     );
+
+    ESP_LOGE("COLOR", "B: %d, R: %d, G: %d, W: %d", color.blue, color.red, color.green, color.white);
 
     if(err != ESP_OK)
     {

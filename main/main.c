@@ -35,19 +35,20 @@ void app_main(void)
     /* High priority. This is the main backlight controller task*/
     xTaskCreate(TvBacklight_Task, "Backlight Manager Task", 1024 * 6, NULL, 4, NULL);
 
-    /* Temporary while 1 loop for testing
-    while(1)
-    {
+    // Temporary while 1 loop for testing
+    // while(1)
+    // {
 
-        TvBacklight_SetLED_Color(0, color);
-        Refresh_TvBacklight_Strip();
+    //     //TvBacklight_SetLED_Color(0, color);
+    //     Set_TvBacklight_Strip_To_Constant_Color(color);
+    //     Refresh_TvBacklight_Strip();
 
-        color.blue -= 1;
-        color.red += 1;
+    //     color.blue -= 1;
+    //     color.red += 1;
 
-        vTaskDelay(pdMS_TO_TICKS(50));
-    }
-    */
+    //     vTaskDelay(pdMS_TO_TICKS(50));
+    // }
+   // */
 }
 
 
