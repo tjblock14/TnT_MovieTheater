@@ -100,6 +100,9 @@ void udp_listen_task(void *pvParameters)
             /* errno is a LwIP global error integer that stores the error from LwIP functions */
             if(errno == EAGAIN || errno == EWOULDBLOCK)
             {
+                #ifdef DEBUG_CFG
+                ESP_LOGW(TAG, "Waiting for UDP packets on port %d", UDP_LISTEN_PORT);
+                #endif
                 continue; /* Timed out before any data was available */
             }
 
@@ -114,7 +117,11 @@ void udp_listen_task(void *pvParameters)
              /* Convert the Sender's IP from binary to string format and log it */
             char SenderIp[32];
             inet_ntoa_r(SourceAddr.sin_addr, SenderIp, sizeof(SenderIp));
-            //ESP_LOGI(TAG, "RX %d bytes from %s:%d", UdpBytesReceived, SenderIp, ntohs(SourceAddr.sin_port));
+            ESP_LOGI(TAG, "RX %d bytes from %s:%d", UdpBytesReceived, SenderIp, ntohs(SourceAddr.sin_port));
+        #endif
+
+        #ifdef DEBUG_CFG
+            ESP_LOGI(TAG, "Number of bytes received: %d", UdpBytesReceived);
         #endif
 
         /* One complete RGB frame; white remains off. */
@@ -134,7 +141,7 @@ void udp_listen_task(void *pvParameters)
                 xQueueSend(TvBacklight_Queue, &SetSingleLed, portMAX_DELAY);
 
                 #ifdef DEBUG_CFG
-                    //ESP_LOGI("TAG", "Set led %d to R: %d, G:%d, B:%d, W: %d", index, SetSingleLed.Data.one_led.color.red, SetSingleLed.Data.one_led.color.green, SetSingleLed.Data.one_led.color.blue, SetSingleLed.Data.one_led.color.white);
+                    ESP_LOGI("TAG", "Set led %d to R: %d, G:%d, B:%d, W: %d", index, SetSingleLed.Data.one_led.color.red, SetSingleLed.Data.one_led.color.green, SetSingleLed.Data.one_led.color.blue, SetSingleLed.Data.one_led.color.white);
                 #endif
             }
 

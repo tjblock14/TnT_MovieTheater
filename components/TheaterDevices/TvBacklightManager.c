@@ -82,7 +82,6 @@ void TvBacklight_Task(void *pv)
 
                 case TV_BACKLIGHT_CMD_REFRESH:
                     esp_err_t err = Refresh_TvBacklight_Strip();
-                    ESP_LOGI(TAG, "Strip refresh: %s", esp_err_to_name(err));
                     break;
 
                 default:
@@ -124,7 +123,9 @@ esp_err_t TvBacklight_Init(void)
 
     if(TvBacklight_Queue == NULL)
     {
+        #ifdef DEBUG_CFG
         ESP_LOGE(TAG, "Failed to create the Backlight Command Queue");
+        #endif
     }
 
     #ifdef DEBUG_CFG
@@ -160,11 +161,11 @@ esp_err_t TvBacklight_SetLED_Color(uint16_t index, backlight_led_values_t color)
         color.white
     );
 
-    ESP_LOGE("COLOR", "B: %d, R: %d, G: %d, W: %d", color.blue, color.red, color.green, color.white);
-
     if(err != ESP_OK)
     {
+        #ifdef DEBUG_CFG
         ESP_LOGE(TAG, "Error: %d", err);
+        #endif
     }
 
     return err;
@@ -266,7 +267,11 @@ void vInitLedStripHw(void)
 void PowerBacklightStripOn(void)
 {
     /* Enable the Power to the strip */
-    gpio_set_level(BACKLIGHT_STRIP_ENABLE_PIN, true);
+    ESP_ERROR_CHECK(gpio_set_level(BACKLIGHT_STRIP_ENABLE_PIN, true));
+
+    /* Restore the data output without changing its SPI signal routing. */
+    ESP_ERROR_CHECK(gpio_set_pull_mode(TV_BACKLIGHT_PIN, GPIO_FLOATING));
+    ESP_ERROR_CHECK(gpio_set_direction(TV_BACKLIGHT_PIN, GPIO_MODE_OUTPUT));
 }
 
 /**************************************************************************
@@ -278,8 +283,12 @@ void PowerBacklightStripOff(void)
     /* Start by clearing the LED strip */
     Clear_TvBacklight_Strip();
 
-    /* Then disable the GPIO pin that provieds power to the strip */
-    gpio_set_level(BACKLIGHT_STRIP_ENABLE_PIN, false);
+    /* Stop driving data before removing power to avoid back-powering the strip. */
+    ESP_ERROR_CHECK(gpio_set_direction(TV_BACKLIGHT_PIN, GPIO_MODE_INPUT));
+    ESP_ERROR_CHECK(gpio_set_pull_mode(TV_BACKLIGHT_PIN, GPIO_PULLDOWN_ONLY));
+
+    /* Then disable the GPIO pin that provides power to the strip. */
+    ESP_ERROR_CHECK(gpio_set_level(BACKLIGHT_STRIP_ENABLE_PIN, false));
 
     /* If the device was turned off via bluetooth, set it for sleep */
     vSleepWithBluetooth();

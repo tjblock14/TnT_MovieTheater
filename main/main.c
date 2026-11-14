@@ -35,7 +35,7 @@ void app_main(void)
     /* High priority. This is the main backlight controller task*/
     xTaskCreate(TvBacklight_Task, "Backlight Manager Task", 1024 * 6, NULL, 4, NULL);
 
-    // Temporary while 1 loop for testing
+    /* Temporary while 1 loop for testing */
     // while(1)
     // {
 
@@ -48,7 +48,6 @@ void app_main(void)
 
     //     vTaskDelay(pdMS_TO_TICKS(50));
     // }
-   // */
 }
 
 

@@ -1,4 +1,4 @@
-#define DEBUG_CFG
+//#define DEBUG_CFG
 
 /* The number of LEDs on the TV backlight strip */
-#define NUM_BACKLIGHT_LEDS 261
+#define NUM_BACKLIGHT_LEDS 270
