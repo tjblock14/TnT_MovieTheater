@@ -241,6 +241,33 @@ esp_err_t Clear_TvBacklight_Strip(void)
 }
 
 /**************************************************************************
+ * FUNCTION : vConvertRgbToRgbw
+ * PURPOSE  : Convert an RGB color signal from HyoerHDR into RGBW for 
+ *            our SK6812 LED strip
+ * INPUTS   : 
+ *      *Color : The color structure that we are working on
+ **************************************************************************/
+void vConvertRgbToRgbw(backlight_led_values_t *Color)
+{
+    uint8_t u8MinColorLevel = Color->red;
+
+    if(u8MinColorLevel > Color->green)
+    {
+        u8MinColorLevel = Color->green;
+    }
+
+    if(u8MinColorLevel > Color->blue)
+    {
+        u8MinColorLevel = Color->blue;
+    }
+
+    Color->red -= u8MinColorLevel;
+    Color->green -= u8MinColorLevel;
+    Color->blue -= u8MinColorLevel;
+    Color->white = u8MinColorLevel;
+}
+
+/**************************************************************************
  * FUNCTION : vInitLedStripHw
  * PURPOSE  : Configure the pin thaet controls the power to the LED strip
  **************************************************************************/

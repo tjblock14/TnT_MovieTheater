@@ -87,4 +87,6 @@ esp_err_t Clear_TvBacklight_Strip(void);
 void      PowerBacklightStripOff(void);
 void      TvBacklight_Task(void *pv);
 
+void vConvertRgbToRgbw(backlight_led_values_t *color);
+
 #endif // TV_BACKLIGHT_MANAGER_H

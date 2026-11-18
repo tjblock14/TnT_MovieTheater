@@ -133,10 +133,15 @@ void udp_listen_task(void *pvParameters)
             {
                 SetSingleLed.action                   = TV_BACKLIGHT_CMD_SINGLE_LED;
                 SetSingleLed.Data.one_led.index       = index;
+
+                
+
+                /* Since HyperHDR sends colors as RGB, we need to convert to RGBW for the strip */
                 SetSingleLed.Data.one_led.color.red   = udp_buff[(index * 3)];
                 SetSingleLed.Data.one_led.color.green = udp_buff[(index * 3) + 1];
                 SetSingleLed.Data.one_led.color.blue  = udp_buff[(index * 3) + 2];
-                SetSingleLed.Data.one_led.color.white = 0;
+
+                vConvertRgbToRgbw(&SetSingleLed.Data.one_led.color);
 
                 xQueueSend(TvBacklight_Queue, &SetSingleLed, portMAX_DELAY);
 
